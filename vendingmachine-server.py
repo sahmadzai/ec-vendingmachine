@@ -4,20 +4,14 @@ import time
 import signal
 import sys
 
+# Temp URL (changes every run): 
+
 # Global time sleep durations
-BUTTON_PRESS_DURATION = 1
+BUTTON_PRESS_DURATION = 3
 BUTTON_REST_DURATION = 0.8
 
-# Set up GPIOs with 0 as the initial state
-# We're using GPIO pins 11, 13, 15, 16, 18, 22, 29
+# Set GPIO mode to BOARD, which means we are referring to the physical pin numbers.
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(11, GPIO.OUT, initial=0)
-GPIO.setup(13, GPIO.OUT, initial=0)
-GPIO.setup(15, GPIO.OUT, initial=0)
-GPIO.setup(16, GPIO.OUT, initial=0)
-GPIO.setup(18, GPIO.OUT, initial=0)
-GPIO.setup(22, GPIO.OUT, initial=0)
-GPIO.setup(29, GPIO.OUT, initial=0)
 
 # Flask app
 app = Flask(__name__)
@@ -31,8 +25,8 @@ def trigger_gpio():
         PIN_COMBINATION = get_pins(data['selection'])
         print(PIN_COMBINATION)
         
-        control_gpio(PIN_COMBINATION[0], PIN_COMBINATION[1], PIN_COMBINATION[2], PIN_COMBINATION[3])
-        return ("\n GPIO pins " + str(PIN_COMBINATION[0]) + " , " + str(PIN_COMBINATION[1]) + " & " + str(PIN_COMBINATION[2]) + ", " + str(PIN_COMBINATION[3]) + " were triggered.")
+        control_gpio(PIN_COMBINATION[0], PIN_COMBINATION[1])
+        return ("\n GPIO pins " + str(PIN_COMBINATION[0]) + " , " + str(PIN_COMBINATION[1]) + " were triggered.")
     else:
         return "Invalid request"
 
@@ -40,41 +34,46 @@ def trigger_gpio():
 def get_pins(usr_choice):
     # Dictionary to map choices to pin combinations
     pin_mapping = {
-        10: (29, 22, 18, 11),
-        12: (29, 22, 29, 18),
-        14: (29, 22, 22, 15),
-        16: (29, 22, 15, 16),
-        18: (29, 22, 18, 13),
-        20: (29, 18, 18, 11),
-        22: (29, 18, 29, 18),
-        24: (29, 18, 22, 15),
-        26: (29, 18, 15, 16),
-        28: (29, 18, 18, 13),
-        30: (29, 16, 18, 11),
-        32: (29, 16, 29, 18),
-        34: (29, 16, 22, 15),
-        36: (29, 16, 15, 16),
-        38: (29, 16, 18, 13),
-        40: (22, 15, 18, 11),
-        42: (22, 15, 29, 18),
-        44: (22, 15, 22, 15),
-        46: (22, 15, 15, 16),
-        48: (22, 15, 18, 13),
-        50: (15, 18, 18, 11),
-        51: (15, 18, 29, 22),
-        52: (15, 18, 29, 18),
-        53: (15, 18, 29, 16),
-        54: (15, 18, 22, 15),
-        55: (15, 18, 15, 18),
-        56: (15, 18, 15, 16),
-        57: (15, 18, 22, 13),
-        58: (15, 18, 18, 13),
-        59: (15, 18, 13, 16),
-        60: (15, 16, 18, 11),
-        62: (15, 16, 29, 18),
-        64: (15, 16, 22, 15),
-        66: (15, 16, 15, 16),
-        68: (15, 16, 18, 13)
+        10: (31, 3),
+        12: (31, 7),
+        14: (31, 13),
+        16: (31, 19),
+        18: (31, 23),
+        20: (33, 3),
+        22: (33, 7),
+        24: (33, 13),
+        26: (33, 19),
+        28: (33, 23),
+        30: (35, 3),
+        31: (35, 5),
+        32: (35, 7),
+        33: (35, 11),
+        34: (35, 13),
+        35: (35, 15),
+        36: (35, 19),
+        37: (35, 21),
+        38: (35, 23),
+        39: (35, 29),
+        40: (37, 3),
+        42: (37, 7),
+        44: (37, 13),
+        46: (37, 19),
+        48: (37, 23),
+        50: (26, 3),
+        51: (26, 5),
+        52: (26, 7),
+        53: (26, 11),
+        54: (26, 13),
+        55: (26, 15),
+        56: (26, 19),
+        57: (26, 21),
+        58: (26, 23),
+        59: (26, 29),
+        60: (32, 3),
+        62: (32, 7),
+        64: (32, 13),
+        66: (32, 19),
+        68: (32, 23),
     }
     
     # Check if choice is in the dictionary
@@ -85,26 +84,19 @@ def get_pins(usr_choice):
             
 
 # Function to control GPIO pins
-def control_gpio(pin1, pin2, pin3, pin4):
+def control_gpio(pin1, pin2):
     # Trigger first set of pins
-    # print("\nTriggering first set of GPIO pins " + str(pin1) + " & " + str(pin2)) 
-    GPIO.output(pin1, 1)
-    GPIO.output(pin2, 1)
-    time.sleep(BUTTON_PRESS_DURATION)
-    # print("\nTurning " + str(pin1) + " & " + str(pin2) + " off")
+    # print("\nTriggering first set of GPIO pins " + str(pin1) + " & " + str(pin2))
+    GPIO.setup(pin1, GPIO.OUT)
     GPIO.output(pin1, 0)
+
+    GPIO.setup(pin2, GPIO.OUT)
     GPIO.output(pin2, 0)
-    
-    time.sleep(BUTTON_REST_DURATION)
-    
-    # Trigger second set of pins
-    # print("\nTriggering second set of GPIO pins " + str(pin3) + " & " + str(pin4)) 
-    GPIO.output(pin3, 1)
-    GPIO.output(pin4, 1)
     time.sleep(BUTTON_PRESS_DURATION)
-    # print("\nTurning " + str(pin3) + " & " + str(pin4) + " off")
-    GPIO.output(pin3, 0)
-    GPIO.output(pin4, 0)
+
+    # print("\nTurning " + str(pin1) + " & " + str(pin2) + " off")
+    GPIO.setup(pin1, GPIO.IN)
+    GPIO.setup(pin2, GPIO.IN)
     
 
 # Signal handler for SIGINT (KeyboardInterrupt)
